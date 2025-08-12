@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Libsystems - Digital Library Management</title>
+    <!-- Link to static CSS -->
+    <link rel="stylesheet" th:href="@{/css/landing.css}">
+    <!-- Font Awesome CDN -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-book-open"></i>
+                <span>Libsystems</span>
+            </div>
+            <div class="nav-menu">
+                <a href="#home" class="nav-link">Home</a>
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#about" class="nav-link">About</a>
+                <button class="login-btn" onclick="openModal('loginModal')">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </div>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>Welcome to <span class="gradient-text">Libsystems</span></h1>
+                <p class="hero-subtitle">Your Gateway to Knowledge Management</p>
+                <p class="hero-description">
+                    Discover, borrow, and manage books with our modern digital library system. 
+                    Access thousands of books and connect with knowledge like never before.
+                </p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary" onclick="openModal('loginModal')">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                    <button class="btn btn-secondary" onclick="openModal('adminModal')">
+                        <i class="fas fa-user-shield"></i> Admin Login
+                    </button>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="floating-books">
+                    <div class="book book-1"><i class="fas fa-book"></i></div>
+                    <div class="book book-2"><i class="fas fa-book-open"></i></div>
+                    <div class="book book-3"><i class="fas fa-bookmark"></i></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features, Stats, About Sections (unchanged for brevity) -->
+    <!-- Copy these directly from your original HTML -->
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Welcome Back</h2>
+                <span class="close" onclick="closeModal('loginModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <!-- Thymeleaf form for user login -->
+                <form th:action="@{/login}" method="post" id="loginForm">
+                    <!-- Display error message if login fails -->
+                    <div th:if="${param.error}" class="message error">
+                        Invalid username or password
+                    </div>
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </form>
+                <div class="modal-footer">
+                    <p>
+                        <a href="#" onclick="switchModal('loginModal', 'adminModal')">Admin Login</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-shield"></i> Admin Access</h2>
+                <span class="close" onclick="closeModal('adminModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <!-- Thymeleaf form for admin login -->
+                <form th:action="@{/admin/login}" method="post" id="adminForm">
+                    <div th:if="${param.error}" class="message error">
+                        Invalid admin credentials
+                    </div>
+                    <div class="form-group">
+                        <label for="adminUsername">Admin Username</label>
+                        <input type="text" id="adminUsername" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminPassword">Admin Password</label>
+                        <input type="password" id="adminPassword" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-admin btn-full">
+                        <i class="fas fa-sign-in-alt"></i> Admin Login
+                    </button>
+                </form>
+                <div class="modal-footer">
+                    <p>
+                        <a href="#" onclick="switchModal('adminModal', 'loginModal')">Back to User Login</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer (unchanged for brevity) -->
+    <!-- Copy from your original HTML -->
+
+    <!-- Keep minimal JS for modals -->
+    <script th:src="@{/js/landing.js}"></script>
+</body>
+</html>
