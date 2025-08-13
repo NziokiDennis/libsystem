@@ -1,215 +1,124 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - LibraryHub</title>
+    <title th:text="${pageTitle}">Admin Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif; }
-        body { background: #f9fafb; color: #111827; }
-
-        /* Navbar */
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 2rem;
-            background: #ffffff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .navbar h1 { font-size: 1.5rem; color: #1f2937; }
-        .navbar a { text-decoration: none; color: #3b82f6; margin-left: 1rem; }
-
-        /* Dashboard Container */
-        .dashboard-container { display: flex; min-height: 100vh; }
-
-        /* Sidebar */
-        .sidebar {
-            width: 220px;
-            background: #1f2937;
-            color: #f9fafb;
-            display: flex;
-            flex-direction: column;
-            padding: 2rem 1rem;
-        }
-        .sidebar a {
-            color: #f9fafb;
-            text-decoration: none;
-            margin: 0.8rem 0;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            transition: background 0.2s;
-        }
-        .sidebar a:hover { background: #3b82f6; }
-
-        /* Main Content */
-        .main-content { flex: 1; padding: 2rem; }
-
-        /* Cards */
-        .cards { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 2rem; }
-        .card {
-            background: #ffffff;
-            flex: 1 1 200px;
-            padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
-        }
-        .card:hover { transform: translateY(-4px); }
-        .card h2 { font-size: 1.25rem; margin-bottom: 0.5rem; color: #111827; }
-        .card p { font-size: 2rem; color: #3b82f6; font-weight: bold; }
-
-        /* Stats Section */
-        .stats { display: flex; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
-        .stat-card { background: #ffffff; padding: 1rem; border-radius: 10px; flex: 1; box-shadow: 0 2px 12px rgba(0,0,0,0.05); text-align: center; }
-        .stat-card h3 { font-size: 1rem; color: #6b7280; margin-bottom: 0.5rem; }
-        .stat-card p { font-size: 1.5rem; color: #3b82f6; font-weight: bold; }
-
-        /* Table */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #ffffff;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-            margin-bottom: 2rem;
-        }
-        table th, table td {
-            padding: 0.75rem 1rem;
-            text-align: left;
-        }
-        table th { background: #f3f4f6; font-weight: 600; }
-        table tr:nth-child(even) { background: #f9fafb; }
-
-        @media(max-width: 768px) {
-            .dashboard-container { flex-direction: column; }
-            .sidebar { width: 100%; flex-direction: row; overflow-x: auto; padding: 1rem; }
-            .sidebar a { margin: 0 0.5rem; white-space: nowrap; }
-        }
+        body { font-family: Arial, sans-serif; background: #f3f4f6; margin: 0; padding: 0; }
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: #1f2937; color: white; }
+        .navbar a { color: white; text-decoration: none; margin-left: 1rem; }
+        .dashboard-content { padding: 2rem; max-width: 1400px; margin: auto; }
+        .cards { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; }
+        .card { flex: 1 1 220px; padding: 1.5rem; background: white; border-radius: 0.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.08); text-align: center; }
+        .card h3 { margin: 0 0 0.5rem; font-size: 1rem; color: #374151; }
+        .card p { font-size: 1.75rem; font-weight: bold; margin: 0; color: #111827; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 0.5rem; overflow: hidden; margin-bottom: 2rem; }
+        th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
+        th { background: #f9fafb; font-weight: 600; }
+        .btn { padding: 0.4rem 0.8rem; background: #3b82f6; color: white; border: none; border-radius: 0.25rem; cursor: pointer; }
+        .btn:hover { background: #2563eb; }
+        .section-title { font-size: 1.25rem; margin-bottom: 1rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.25rem; color: #111827; }
+        .cards .card span { display: block; margin-top: 0.5rem; color: #6b7280; font-size: 0.85rem; }
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <h1>LibraryHub</h1>
-        <div>
-            <a href="#">Profile</a>
-            <a href="#">Logout</a>
-        </div>
-    </nav>
 
-    <div class="dashboard-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <a href="#">Dashboard</a>
-            <a href="#">Manage Students</a>
-            <a href="#">Manage Books</a>
-            <a href="#">Approve Requests</a>
-            <a href="#">Reports</a>
-            <a href="#">Settings</a>
-        </aside>
-
-        <!-- Main Content -->
-        <section class="main-content">
-            <!-- Cards -->
-            <div class="cards">
-                <div class="card">
-                    <h2>Total Students</h2>
-                    <p>124</p>
-                </div>
-                <div class="card">
-                    <h2>Total Books</h2>
-                    <p>432</p>
-                </div>
-                <div class="card">
-                    <h2>Pending Requests</h2>
-                    <p>17</p>
-                </div>
-                <div class="card">
-                    <h2>Overdue Books</h2>
-                    <p>5</p>
-                </div>
-            </div>
-
-            <!-- Stats -->
-            <div class="stats">
-                <div class="stat-card">
-                    <h3>Books Borrowed Today</h3>
-                    <p>34</p>
-                </div>
-                <div class="stat-card">
-                    <h3>Requests Approved</h3>
-                    <p>21</p>
-                </div>
-                <div class="stat-card">
-                    <h3>Books Available</h3>
-                    <p>398</p>
-                </div>
-            </div>
-
-            <!-- Students Table -->
-            <h2>Registered Students</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Student Name</th>
-                        <th>Email</th>
-                        <th>Borrowed Books</th>
-                        <th>Pending Requests</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>John Doe</td>
-                        <td>john@example.com</td>
-                        <td>3</td>
-                        <td>1</td>
-                        <td>Active</td>
-                    </tr>
-                    <tr>
-                        <td>Jane Smith</td>
-                        <td>jane@example.com</td>
-                        <td>2</td>
-                        <td>0</td>
-                        <td>Active</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <!-- Books Table -->
-            <h2>Recent Book Records</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Book Title</th>
-                        <th>Author</th>
-                        <th>Borrowed By</th>
-                        <th>Borrowed On</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Java Programming</td>
-                        <td>John Doe</td>
-                        <td>John Doe</td>
-                        <td>2025-08-01</td>
-                        <td>On Time</td>
-                    </tr>
-                    <tr>
-                        <td>Data Structures</td>
-                        <td>Jane Smith</td>
-                        <td>Jane Smith</td>
-                        <td>2025-07-25</td>
-                        <td>Overdue</td>
-                    </tr>
-                </tbody>
-            </table>
-        </section>
+<nav class="navbar">
+    <div>LibraryHub Admin</div>
+    <div>
+        <a th:href="@{/admin/profile}">Profile</a>
+        <form th:action="@{/admin/logout}" method="post" style="display:inline;">
+            <button type="submit" class="btn">Logout</button>
+        </form>
     </div>
+</nav>
+
+<div class="dashboard-content">
+
+    <!-- KPI Cards -->
+<div class="cards">
+    <div class="card">
+        <h3>Total Users</h3>
+        <p th:text="${userStats.totalUsers}">0</p>
+    </div>
+    <div class="card">
+        <h3>Total Students</h3>
+        <p th:text="${userStats.totalStudents}">0</p>
+    </div>
+    <div class="card">
+        <h3>Total Admins</h3>
+        <p th:text="${userStats.totalAdmins}">0</p>
+    </div>
+    <div class="card">
+        <h3>Active Borrows</h3>
+        <p th:text="${userStats.activeBorrows}">0</p>
+    </div>
+    <div class="card">
+        <h3>Overdue Borrows</h3>
+        <p th:text="${userStats.overdueBorrows}">0</p>
+    </div>
+</div>
+
+    <!-- Recent Students Table -->
+    <div class="section">
+        <div class="section-title">Recent Students</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Full Name</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="student : ${recentStudents}">
+                    <td th:text="${student.fullName}">Full Name</td>
+                    <td th:text="${student.username}">username</td>
+                    <td th:text="${student.email}">email@example.com</td>
+                    <td th:text="${student.active ? 'Active' : 'Inactive'}">Status</td>
+                    <td>
+                        <a th:href="@{'/admin/students/' + ${student.userId}}" class="btn">View</a>
+                        <form th:action="@{${student.active} ? '/admin/students/' + ${student.userId} + '/deactivate' : '/admin/students/' + ${student.userId} + '/reactivate'}"
+                              method="post" style="display:inline;">
+                            <button type="submit" class="btn" th:text="${student.active} ? 'Deactivate' : 'Reactivate'"></button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- System Summary -->
+    <div class="section">
+        <div class="section-title">System Summary</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Max Borrow Days</td>
+                    <td th:text="${maxBorrowDays}">14</td>
+                </tr>
+                <tr>
+                    <td>Max Books per User</td>
+                    <td th:text="${maxBooksPerUser}">3</td>
+                </tr>
+                <tr>
+                    <td>System Maintenance Mode</td>
+                    <td th:text="${systemMaintenanceMode} ? 'ON' : 'OFF'">OFF</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
 </body>
 </html>
