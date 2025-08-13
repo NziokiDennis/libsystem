@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - LibraryHub</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+
+<!-- Navigation Bar -->
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="#" class="navbar-brand">
+            <i class="fas fa-user-shield"></i>
+            LibraryHub Admin
+        </a>
+        <div class="navbar-right">
+            <div class="user-welcome">
+                <i class="fas fa-user-circle"></i>
+                <span th:text="${currentUser?.fullName ?: 'Administrator'}">Administrator</span>
+            </div>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="dashboard-content">
+    <!-- Welcome Section -->
+    <div class="welcome-section fade-in">
+        <div class="welcome-content">
+            <h1>Admin Dashboard</h1>
+            <p class="welcome-subtitle">Manage your library system efficiently</p>
+        </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid fade-in">
+        <div class="kpi-card">
+            <div class="kpi-icon books">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="kpi-content">
+                <div class="kpi-number" th:text="${totalBooks ?: 0}">0</div>
+                <div class="kpi-label">Total Books</div>
+            </div>
+        </div>
+        
+        <div class="kpi-card">
+            <div class="kpi-icon users">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="kpi-content">
+                <div class="kpi-number" th:text="${totalStudents ?: 0}">0</div>
+                <div class="kpi-label">Registered Students</div>
+            </div>
+        </div>
+        
+        <div class="kpi-card">
+            <div class="kpi-icon borrowed">
+                <i class="fas fa-bookmark"></i>
+            </div>
+            <div class="kpi-content">
+                <div class="kpi-number" th:text="${activeBorrows ?: 0}">0</div>
+                <div class="kpi-label">Active Borrows</div>
+            </div>
+        </div>
+        
+        <div class="kpi-card alert" th:classappend="${overdueBorrows > 0 ? 'overdue-alert' : ''}">
+            <div class="kpi-icon overdue">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="kpi-content">
+                <div class="kpi-number" th:text="${overdueBorrows ?: 0}">0</div>
+                <div class="kpi-label">Overdue Books</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="section fade-in">
+        <div class="section-header">
+            <i class="fas fa-bolt"></i>
+            <h2>Quick Actions</h2>
+        </div>
+        <div class="quick-actions">
+            <button class="action-btn primary" onclick="showAddBookModal()">
+                <i class="fas fa-plus"></i>
+                Add New Book
+            </button>
+            <button class="action-btn secondary" onclick="showAddStudentModal()">
+                <i class="fas fa-user-plus"></i>
+                Register Student
+            </button>
+            <a href="/admin/books" class="action-btn info">
+                <i class="fas fa-books"></i>
+                Manage Books
+            </a>
+            <a href="/admin/reports" class="action-btn warning">
+                <i class="fas fa-chart-bar"></i>
+                Generate Reports
+            </a>
+        </div>
+    </div>
+
+    <!-- Active Borrows -->
+    <div class="section fade-in">
+        <div class="section-header">
+            <i class="fas fa-bookmark"></i>
+            <h2>Active Borrows</h2>
+            <span class="badge" th:text="${activeBorrowsList?.size() ?: 0}">0</span>
+        </div>
+        <div class="section-content">
+            <div class="scrollable" th:if="${activeBorrowsList != null and activeBorrowsList.size() > 0}">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Book Title</th>
+                            <th>Author</th>
+                            <th>Borrow Date</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="borrow : ${activeBorrowsList}" 
+                            th:classappend="${borrow.borrowDate != null and borrow.borrowDate.plusDays(14).isBefore(T(java.time.LocalDate).now()) ? 'overdue-row' : ''}">
+                            <td th:text="${borrow.student.fullName}">Student Name</td>
+                            <td th:text="${borrow.book.title}">Book Title</td>
+                            <td th:text="${borrow.book.author}">Author</td>
+                            <td th:text="${borrow.borrowDate}">2024-01-01</td>
+                            <td th:text="${borrow.borrowDate != null ? borrow.borrowDate.plusDays(14) : '-'}">2024-01-15</td>
+                            <td>
+                                <span class="status-badge" 
+                                      th:classappend="${borrow.borrowDate != null and borrow.borrowDate.plusDays(14).isBefore(T(java.time.LocalDate).now()) ? 'status-overdue' : 'status-active'}"
+                                      th:text="${borrow.borrowDate != null and borrow.borrowDate.plusDays(14).isBefore(T(java.time.LocalDate).now()) ? 'OVERDUE' : 'ACTIVE'}">ACTIVE</span>
+                            </td>
+                            <td>
+                                <form th:action="@{/admin/return/{borrowId}(borrowId=${borrow.id})}" method="post" class="inline-form">
+                                    <button type="submit" class="btn-return-small" title="Mark as Returned">
+                                        <i class="fas fa-undo"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="empty-state" th:if="${activeBorrowsList == null or activeBorrowsList.size() == 0}">
+                <i class="fas fa-bookmark"></i>
+                <h3>No active borrows</h3>
+                <p>All books are currently available</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="activities-grid">
+        <!-- Recent Book Additions -->
+        <div class="section fade-in">
+            <div class="section-header">
+                <i class="fas fa-plus-circle"></i>
+                <h2>Recent Book Additions</h2>
+            </div>
+            <div class="section-content">
+                <div class="scrollable recent-list" th:if="${recentBooks != null and recentBooks.size() > 0}">
+                    <div class="recent-item" th:each="book : ${recentBooks}">
+                        <div class="recent-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="recent-content">
+                            <div class="recent-title" th:text="${book.title}">Book Title</div>
+                            <div class="recent-subtitle" th:text="${book.author}">Author</div>
+                            <div class="recent-meta">
+                                <span th:text="${book.totalCopies + ' copies'}">5 copies</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="empty-state" th:if="${recentBooks == null or recentBooks.size() == 0}">
+                    <i class="fas fa-plus-circle"></i>
+                    <h4>No recent additions</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Returns -->
+        <div class="section fade-in">
+            <div class="section-header">
+                <i class="fas fa-undo"></i>
+                <h2>Recent Returns</h2>
+            </div>
+            <div class="section-content">
+                <div class="scrollable recent-list" th:if="${recentReturns != null and recentReturns.size() > 0}">
+                    <div class="recent-item" th:each="borrow : ${recentReturns}">
+                        <div class="recent-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="recent-content">
+                            <div class="recent-title" th:text="${borrow.book.title}">Book Title</div>
+                            <div class="recent-subtitle" th:text="${borrow.student.fullName}">Student Name</div>
+                            <div class="recent-meta">
+                                <span th:text="${borrow.returnDate ?: 'Just returned'}">2024-01-15</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="empty-state" th:if="${recentReturns == null or recentReturns.size() == 0}">
+                    <i class="fas fa-undo"></i>
+                    <h4>No recent returns</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Alerts -->
+    <div class="section fade-in" th:if="${alerts != null and alerts.size() > 0}">
+        <div class="section-header">
+            <i class="fas fa-bell"></i>
+            <h2>System Alerts</h2>
+            <span class="badge alert-badge" th:text="${alerts.size()}">0</span>
+        </div>
+        <div class="section-content">
+            <div class="alerts-container">
+                <div class="alert-item" th:each="alert : ${alerts}" th:classappend="${alert.type}">
+                    <i class="fas" th:classappend="${alert.type == 'warning' ? 'fa-exclamation-triangle' : alert.type == 'danger' ? 'fa-times-circle' : 'fa-info-circle'}"></i>
+                    <div class="alert-content">
+                        <div class="alert-title" th:text="${alert.title}">Alert Title</div>
+                        <div class="alert-message" th:text="${alert.message}">Alert message</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Book Modal -->
+<div id="addBookModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-plus"></i> Add New Book</h2>
+            <span class="close" onclick="closeModal('addBookModal')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form th:action="@{/admin/books/add}" method="post" id="addBookForm">
+                <div class="form-group">
+                    <label for="bookTitle">Title *</label>
+                    <input type="text" id="bookTitle" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="bookAuthor">Author *</label>
+                    <input type="text" id="bookAuthor" name="author" required>
+                </div>
+                <div class="form-group">
+                    <label for="bookGenre">Genre</label>
+                    <input type="text" id="bookGenre" name="genre">
+                </div>
+                <div class="form-group">
+                    <label for="bookCopies">Number of Copies *</label>
+                    <input type="number" id="bookCopies" name="totalCopies" min="1" value="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="bookDescription">Description</label>
+                    <textarea id="bookDescription" name="description" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-plus"></i> Add Book
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Student Modal -->
+<div id="addStudentModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-user-plus"></i> Register New Student</h2>
+            <span class="close" onclick="closeModal('addStudentModal')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form th:action="@{/admin/students/add}" method="post" id="addStudentForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="studentFirstName">First Name *</label>
+                        <input type="text" id="studentFirstName" name="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="studentLastName">Last Name *</label>
+                        <input type="text" id="studentLastName" name="lastName" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="studentUsername">Username *</label>
+                    <input type="text" id="studentUsername" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="studentEmail">Email</label>
+                    <input type="email" id="studentEmail" name="email">
+                </div>
+                <div class="form-group">
+                    <label for="studentPassword">Password *</label>
+                    <input type="password" id="studentPassword" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-user-plus"></i> Register Student
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// DOM Content Loaded Event
+document.addEventListener('DOMContentLoaded', function() {
+    initializeAdminDashboard();
+    setupModalHandlers();
+    setupFormValidation();
+    animateKPIs();
+    checkForAlerts();
+});
+
+// Initialize admin dashboard
+function initializeAdminDashboard() {
+    // Add smooth scrolling
+    document.documentElement.style.scrollBehavior = 'smooth';
+    
+    // Initialize animations
+    initializeAnimations();
+    
+    // Setup table interactions
+    enhanceTableInteractions();
+    
+    // Auto-refresh data every 30 seconds
+    setInterval(refreshDashboardData, 30000);
+}
+
+// Setup modal handlers
+function setupModalHandlers() {
+    // Close modals when clicking outside
+    window.addEventListener('click', function(event) {
+        if (event.target.classList.contains('modal')) {
+            closeModal(event.target.id);
+        }
+    });
+    
+    // Handle ESC key to close modals
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const openModal = document.querySelector('.modal[style*="display: block"]');
+            if (openModal) {
+                closeModal(openModal.id);
+            }
+        }
+    });
+}
+
+// Modal functions
+function showAddBookModal() {
+    openModal('addBookModal');
+}
+
+function showAddStudentModal() {
+    openModal('addStudentModal');
+}
+
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        
+        // Focus on first input
+        setTimeout(() => {
+            const firstInput = modal.querySelector('input, textarea');
+            if (firstInput) firstInput.focus();
+        }, 100);
+    }
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        
+        // Clear form
+        const form = modal.querySelector('form');
+        if (form) {
+            form.reset();
+            clearFormErrors(form);
+        }
+    }
+}
+
+// Form validation setup
+function setupFormValidation() {
+    // Add Book Form Validation
+    const addBookForm = document.getElementById('addBookForm');
+    if (addBookForm) {
+        addBookForm.addEventListener('submit', function(e) {
+            if (!validateBookForm(this)) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<div class="loading"></div> Adding Book...';
+            submitBtn.disabled = true;
+        });
+    }
+    
+    // Add Student Form Validation
+    const addStudentForm = document.getElementById('addStudentForm');
+    if (addStudentForm) {
+        addStudentForm.addEventListener('submit', function(e) {
+            if (!validateStudentForm(this)) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<div class="loading"></div> Registering...';
+            submitBtn.disabled = true;
+        });
+    }
+    
+    // Real-time validation
+    document.querySelectorAll('input, textarea').forEach(field => {
+        field.addEventListener('blur', function() {
+            validateField(this);
+        });
+        
+        field.addEventListener('input', function() {
+            clearFieldError(this);
+        });
+    });
+}
+
+// Validation functions
+function validateBookForm(form) {
+    let isValid = true;
+    
+    const title = form.querySelector('#bookTitle');
+    const author = form.querySelector('#bookAuthor');
+    const copies = form.querySelector('#bookCopies');
+    
+    if (!title.value.trim()) {
+        showFieldError(title, 'Title is required');
+        isValid = false;
+    }
+    
+    if (!author.value.trim()) {
+        showFieldError(author, 'Author is required');
+        isValid = false;
+    }
+    
+    if (!copies.value || copies.value < 1) {
+        showFieldError(copies, 'At least 1 copy is required');
+        isValid = false;
+    }
+    
+    return isValid;
+}
+
+function validateStudentForm(form) {
+    let isValid = true;
+    
+    const firstName = form.querySelector('#studentFirstName');
+    const lastName = form.querySelector('#studentLastName');
+    const username = form.querySelector('#studentUsername');
+    const password = form.querySelector('#studentPassword');
+    
+    if (!firstName.value.trim()) {
+        showFieldError(firstName, 'First name is required');
+        isValid = false;
+    }
+    
+    if (!lastName.value.trim()) {
+        showFieldError(lastName, 'Last name is required');
+        isValid = false;
+    }
+    
+    if (!username.value.trim()) {
+        showFieldError(username, 'Username is required');
+        isValid = false;
+    } else if (username.value.length < 3) {
+        showFieldError(username, 'Username must be at least 3 characters');
+        isValid = false;
+    }
+    
+    if (!password.value.trim()) {
+        showFieldError(password, 'Password is required');
+        isValid = false;
+    } else if (password.value.length < 6) {
+        showFieldError(password, 'Password must be at least 6 characters');
+        isValid = false;
+    }
+    
+    return isValid;
+}
+
+function validateField(field) {
+    const fieldName = field.name;
+    const value = field.value.trim();
+    
+    switch(fieldName) {
+        case 'totalCopies':
+            if (value && (value < 1 || !Number.isInteger(Number(value)))) {
+                showFieldError(field, 'Must be a positive integer');
+            }
+            break;
+        case 'password':
+            if (value && value.length < 6) {
+                showFieldError(field, 'Password must be at least 6 characters');
+            }
+            break;
+        case 'username':
+            if (value && value.length < 3) {
+                showFieldError(field, 'Username must be at least 3 characters');
+            }
+            break;
+    }
+}
+
+// Error handling functions
+function showFieldError(field, message) {
+    clearFieldError(field);
+    
+    field.style.borderColor = '#ef4444';
+    field.style.background = '#fef2f2';
+    
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'field-error';
+    errorDiv.style.color = '#ef4444';
+    errorDiv.style.fontSize = '0.875rem';
+    errorDiv.style.marginTop = '0.25rem';
+    errorDiv.textContent = message;
+    
+    field.parentNode.appendChild(errorDiv);
+}
+
+function clearFieldError(field) {
+    field.style.borderColor = '#e5e7eb';
+    field.style.background = '#f9fafb';
+    
+    const existingError = field.parentNode.querySelector('.field-error');
+    if (existingError) {
+        existingError.remove();
+    }
+}
+
+function clearFormErrors(form) {
+    form.querySelectorAll('.field-error').forEach(error => error.remove());
+    form.querySelectorAll('input, textarea').forEach(input => {
+        input.style.borderColor = '#e5e7eb';
+        input.style.background = '#f9fafb';
+    });
+}
+
+// Animation functions
+function initializeAnimations() {
+    // Fade in sections
+    const sections = document.querySelectorAll('.fade-in');
+    sections.forEach((section, index) => {
+        section.style.opacity = '0';
+        section.style.transform = 'translateY(30px)';
+        section.style.transition = `all 0.6s ease ${index * 0.1}s`;
+        
+        setTimeout(() => {
+            section.style.opacity = '1';
+            section.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+}
+
+function animateKPIs() {
+    const kpiNumbers = document.querySelectorAll('.kpi-number');
+    
+    kpiNumbers.forEach(kpi => {
+        const target = parseInt(kpi.textContent) || 0;
+        const duration = 2000;
+        const startTime = performance.now();
+        
+        function updateNumber(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const current = Math.floor(target * progress);
+            
+            kpi.textContent = current;
+            
+            if (progress < 1) {
+                requestAnimationFrame(updateNumber);
+            }
+        }
+        
+        requestAnimationFrame(updateNumber);
+    });
+}
+
+// Enhanced interactions
+function enhanceTableInteractions() {
+    const tableRows = document.querySelectorAll('tbody tr');
+    
+    tableRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            if (!this.classList.contains('overdue-row')) {
+                this.style.transform = 'scale(1.02)';
+                this.style.zIndex = '10';
+                this.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.1)';
+            }
+        });
+        
+        row.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+            this.style.zIndex = '1';
+            this.style.boxShadow = 'none';
+        });
+    });
+}
+
+// Alert checking
+function checkForAlerts() {
+    // Check for overdue books
+    const overdueCount = parseInt(document.querySelector('.kpi-card .overdue .kpi-number')?.textContent) || 0;
+    
+    if (overdueCount > 0) {
+        showNotification(`${overdueCount} books are overdue`, 'warning', false);
+    }
+    
+    // Check URL parameters for messages
+    const urlParams = new URLSearchParams(window.location.search);
+    const success = urlParams.get('success');
+    const error = urlParams.get('error');
+    
+    if (success) {
+        showNotification(decodeURIComponent(success), 'success');
+    }
+    
+    if (error) {
+        showNotification(decodeURIComponent(error), 'error');
+    }
+}
+
+// Notification system
+function showNotification(message, type = 'info', autoHide = true) {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#3b82f6'};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        z-index: 3000;
+        max-width: 300px;
+        animation: slideInNotification 0.3s ease;
+    `;
+    
+    notification.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-times-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    if (autoHide) {
+        setTimeout(() => {
+            notification.style.animation = 'slideOutNotification 0.3s ease';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 5000);
+    }
+}
+
+// Data refresh function
+function refreshDashboardData() {
+    // This would typically make an AJAX call to refresh dashboard data
+    // For now, we'll just update the timestamp
+    console.log('Dashboard data refresh:', new Date().toLocaleTimeString());
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Ctrl + B for Add Book
+    if (e.ctrlKey && e.key === 'b') {
+        e.preventDefault();
+        showAddBookModal();
+    }
+    
+    // Ctrl + S for Add Student
+    if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        showAddStudentModal();
+    }
+    
+    // Alt + H for home
+    if (e.altKey && e.key === 'h') {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+});
+
+// Add notification animations CSS
+const notificationStyles = document.createElement('style');
+notificationStyles.textContent = `
+    @keyframes slideInNotification {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes slideOutNotification {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+    
+    .loading {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+`;
+document.head.appendChild(notificationStyles);
+
+console.log('LibraryHub Admin Dashboard loaded successfully!');
+</script>
+
+</body>
+</html>
