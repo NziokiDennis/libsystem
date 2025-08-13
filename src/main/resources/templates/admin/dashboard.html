@@ -1,167 +1,215 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${pageTitle} + ' - Libsystems'">Admin Dashboard - Libsystems</title>
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link th:href="@{/css/admin.css}" rel="stylesheet" />
+    <title>Admin Dashboard - LibraryHub</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif; }
+        body { background: #f9fafb; color: #111827; }
+
+        /* Navbar */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar h1 { font-size: 1.5rem; color: #1f2937; }
+        .navbar a { text-decoration: none; color: #3b82f6; margin-left: 1rem; }
+
+        /* Dashboard Container */
+        .dashboard-container { display: flex; min-height: 100vh; }
+
+        /* Sidebar */
+        .sidebar {
+            width: 220px;
+            background: #1f2937;
+            color: #f9fafb;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem 1rem;
+        }
+        .sidebar a {
+            color: #f9fafb;
+            text-decoration: none;
+            margin: 0.8rem 0;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .sidebar a:hover { background: #3b82f6; }
+
+        /* Main Content */
+        .main-content { flex: 1; padding: 2rem; }
+
+        /* Cards */
+        .cards { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 2rem; }
+        .card {
+            background: #ffffff;
+            flex: 1 1 200px;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .card:hover { transform: translateY(-4px); }
+        .card h2 { font-size: 1.25rem; margin-bottom: 0.5rem; color: #111827; }
+        .card p { font-size: 2rem; color: #3b82f6; font-weight: bold; }
+
+        /* Stats Section */
+        .stats { display: flex; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
+        .stat-card { background: #ffffff; padding: 1rem; border-radius: 10px; flex: 1; box-shadow: 0 2px 12px rgba(0,0,0,0.05); text-align: center; }
+        .stat-card h3 { font-size: 1rem; color: #6b7280; margin-bottom: 0.5rem; }
+        .stat-card p { font-size: 1.5rem; color: #3b82f6; font-weight: bold; }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+        table th, table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        table th { background: #f3f4f6; font-weight: 600; }
+        table tr:nth-child(even) { background: #f9fafb; }
+
+        @media(max-width: 768px) {
+            .dashboard-container { flex-direction: column; }
+            .sidebar { width: 100%; flex-direction: row; overflow-x: auto; padding: 1rem; }
+            .sidebar a { margin: 0 0.5rem; white-space: nowrap; }
+        }
+    </style>
 </head>
 <body>
-<div class="container-fluid">
-    <div class="row">
-        <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
-            <div class="position-sticky pt-3">
-                <div class="text-center mb-4">
-                    <i class="fas fa-book-open fa-2x mb-2"></i>
-                    <h4>Libsystems</h4>
-                    <p class="small mb-0">Admin Panel</p>
+    <nav class="navbar">
+        <h1>LibraryHub</h1>
+        <div>
+            <a href="#">Profile</a>
+            <a href="#">Logout</a>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a href="#">Dashboard</a>
+            <a href="#">Manage Students</a>
+            <a href="#">Manage Books</a>
+            <a href="#">Approve Requests</a>
+            <a href="#">Reports</a>
+            <a href="#">Settings</a>
+        </aside>
+
+        <!-- Main Content -->
+        <section class="main-content">
+            <!-- Cards -->
+            <div class="cards">
+                <div class="card">
+                    <h2>Total Students</h2>
+                    <p>124</p>
                 </div>
-                
-                <div class="user-info" sec:authorize="isAuthenticated()">
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-user-shield fa-lg me-2"></i>
-                        <div>
-                            <div class="fw-bold" sec:authentication="principal.user.fullName">Admin Name</div>
-                            <small class="text-white-50" sec:authentication="principal.user.username">admin</small>
-                        </div>
-                    </div>
+                <div class="card">
+                    <h2>Total Books</h2>
+                    <p>432</p>
                 </div>
-                
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link" th:classappend="${currentSection == 'dashboard'} ? 'active' : ''" th:href="@{/admin/dashboard}">
-                            <i class="fas fa-tachometer-alt me-2"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" th:classappend="${currentSection == 'students'} ? 'active' : ''" th:href="@{/admin/students}">
-                            <i class="fas fa-users me-2"></i> Students
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" th:classappend="${currentSection == 'books'} ? 'active' : ''" th:href="@{/admin/books}">
-                            <i class="fas fa-book me-2"></i> Books
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" th:classappend="${currentSection == 'reports'} ? 'active' : ''" th:href="@{/admin/reports}">
-                            <i class="fas fa-chart-bar me-2"></i> Reports
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" th:classappend="${currentSection == 'settings'} ? 'active' : ''" th:href="@{/admin/settings}">
-                            <i class="fas fa-cog me-2"></i> Settings
-                        </a>
-                    </li>
-                </ul>
-                
-                <div class="mt-auto pt-4">
-                    <form th:action="@{/logout}" method="post">
-                        <button type="submit" class="btn btn-outline-light w-100">
-                            <i class="fas fa-sign-out-alt me-2"></i> Logout
-                        </button>
-                    </form>
+                <div class="card">
+                    <h2>Pending Requests</h2>
+                    <p>17</p>
+                </div>
+                <div class="card">
+                    <h2>Overdue Books</h2>
+                    <p>5</p>
                 </div>
             </div>
-        </nav>
-        
-        <main class="col-md-9 ms-sm-auto col-lg-10 main-content">
-            <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
-                <h1 class="h2" th:text="${pageTitle}">Dashboard</h1>
-                <div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary">
-                        <i class="fas fa-download me-1"></i> Export
-                    </button>
+
+            <!-- Stats -->
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>Books Borrowed Today</h3>
+                    <p>34</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Requests Approved</h3>
+                    <p>21</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Books Available</h3>
+                    <p>398</p>
                 </div>
             </div>
-            
-            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show">
-                <i class="fas fa-check-circle me-2"></i>
-                <span th:text="${successMessage}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-            
-            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show">
-                <i class="fas fa-exclamation-circle me-2"></i>
-                <span th:text="${errorMessage}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-            
-            <div class="row mb-4" th:if="${userStats}">
-                <div class="col-xl-3 col-md-6 mb-4" th:each="stat : ${#lists.arrayList(
-                    {'Total Users','Students','Admins','Total Books'})}">
-                    <div class="card stats-card border-0 shadow-sm h-100">
-                        <div class="card-body d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="stat-label" th:text="${stat}"></div>
-                                <div class="stat-value" th:text="${userStats[stat]}">0</div>
-                            </div>
-                            <div class="stats-icon" th:classappend="${statIcon[stat]}"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header"><h5 class="mb-0">Quick Actions</h5></div>
-                        <div class="card-body">
-                            <div class="row g-2">
-                                <div class="col-md-3"><a th:href="@{/admin/students/create}" class="btn btn-primary w-100"><i class="fas fa-user-plus me-2"></i>Add Student</a></div>
-                                <div class="col-md-3"><a th:href="@{/admin/books}" class="btn btn-success w-100"><i class="fas fa-book-medical me-2"></i>Manage Books</a></div>
-                                <div class="col-md-3"><a th:href="@{/admin/reports}" class="btn btn-info w-100"><i class="fas fa-chart-line me-2"></i>View Reports</a></div>
-                                <div class="col-md-3"><a th:href="@{/admin/settings}" class="btn btn-secondary w-100"><i class="fas fa-cogs me-2"></i>Settings</a></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header"><h5 class="mb-0">System Status</h5></div>
-                        <div class="card-body">
-                            <div class="alert alert-success"><i class="fas fa-check-circle me-2"></i>Welcome to the Libsystems Admin Dashboard! The system is running smoothly.</div>
-                            <div class="row mt-3">
-                                <div class="col-md-6">
-                                    <h6>Recent Students</h6>
-                                    <div th:if="${recentStudents and !recentStudents.isEmpty()}">
-                                        <div class="list-group">
-                                            <div class="list-group-item" th:each="student,studentStat : ${recentStudents}" th:if="${studentStat.index < 5}">
-                                                <div class="d-flex justify-content-between">
-                                                    <h6 class="mb-1" th:text="${student.fullName}">Student Name</h6>
-                                                    <small th:text="${student.username}">username</small>
-                                                </div>
-                                                <small th:text="${student.email}">email@example.com</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div th:if="${recentStudents == null or recentStudents.isEmpty()}">
-                                        <p class="text-muted">No students registered yet.</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <h6>System Information</h6>
-                                    <ul class="list-unstyled">
-                                        <li><strong>Version:</strong> 1.0.0</li>
-                                        <li><strong>Database:</strong> MySQL Connected</li>
-                                        <li><strong>Server:</strong> Running</li>
-                                        <li><strong>Last Updated:</strong> <span th:text="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd HH:mm')}"></span></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
+
+            <!-- Students Table -->
+            <h2>Registered Students</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Email</th>
+                        <th>Borrowed Books</th>
+                        <th>Pending Requests</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>John Doe</td>
+                        <td>john@example.com</td>
+                        <td>3</td>
+                        <td>1</td>
+                        <td>Active</td>
+                    </tr>
+                    <tr>
+                        <td>Jane Smith</td>
+                        <td>jane@example.com</td>
+                        <td>2</td>
+                        <td>0</td>
+                        <td>Active</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Books Table -->
+            <h2>Recent Book Records</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Book Title</th>
+                        <th>Author</th>
+                        <th>Borrowed By</th>
+                        <th>Borrowed On</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Java Programming</td>
+                        <td>John Doe</td>
+                        <td>John Doe</td>
+                        <td>2025-08-01</td>
+                        <td>On Time</td>
+                    </tr>
+                    <tr>
+                        <td>Data Structures</td>
+                        <td>Jane Smith</td>
+                        <td>Jane Smith</td>
+                        <td>2025-07-25</td>
+                        <td>Overdue</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
     </div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

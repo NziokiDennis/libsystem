@@ -1,201 +1,158 @@
 package com.example.library_system.controller;
 
+import com.example.library_system.model.Book;
+import com.example.library_system.model.BorrowRequest;
+import com.example.library_system.model.User;
+import com.example.library_system.service.BookService;
+import com.example.library_system.service.BorrowRequestService;
 import com.example.library_system.service.CustomUserDetailsService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * Student Controller
- * 
+ *
  * Handles all student-specific operations including dashboard access,
  * book browsing, borrow requests, and profile management.
- * 
+ *
  * Security: All methods require STUDENT role authentication
- * 
+ *
  * Key Features:
  * - Student dashboard with personal information
  * - Book catalog browsing
- * - Borrow request management
+ * - Borrow request management (instant borrow, no approval)
  * - Personal borrowing history
  */
 @Controller
 @RequestMapping("/student")
 @PreAuthorize("hasRole('STUDENT')")
 public class StudentController {
-    
+
+    @Autowired
+    private BookService bookService;
+
+    @Autowired
+    private BorrowRequestService borrowRequestService;
+
     /**
      * Student Dashboard
-     * Displays personalized dashboard with borrowed books, due dates, and quick actions
-     * 
-     * @param authentication Spring Security authentication object
-     * @param model Spring MVC model for passing data to view
-     * @return student dashboard template name
+     * Shows borrowed books, borrow history, and available books.
      */
     @GetMapping("/dashboard")
     public String studentDashboard(Authentication authentication, Model model) {
-        try {
-            // Get current student user from authentication
-            CustomUserDetailsService.CustomUserPrincipal userPrincipal = 
+        CustomUserDetailsService.CustomUserPrincipal userPrincipal =
                 (CustomUserDetailsService.CustomUserPrincipal) authentication.getPrincipal();
-            
-            model.addAttribute("currentUser", userPrincipal.getUser());
-            model.addAttribute("pageTitle", "Student Dashboard");
-            model.addAttribute("currentSection", "dashboard");
-            
-            // TODO: Add borrowed books, due dates, notifications
-            // This would require integration with BorrowRequestService
-            model.addAttribute("welcomeMessage", 
-                "Welcome back, " + userPrincipal.getUser().getFullName() + "!");
-            
-            return "student/dashboard";
-            
-        } catch (Exception e) {
-            System.err.println("Error loading student dashboard: " + e.getMessage());
-            model.addAttribute("errorMessage", "Unable to load dashboard");
-            return "error/student-error";
-        }
+        User user = userPrincipal.getUser();
+        Long studentId = user.getId();
+
+        model.addAttribute("currentUser", user);
+        model.addAttribute("pageTitle", "Student Dashboard");
+        model.addAttribute("currentSection", "dashboard");
+
+        List<BorrowRequest> borrowedBooks = borrowRequestService.getActiveBorrowsByUserId(studentId);
+        model.addAttribute("borrowedBooks", borrowedBooks);
+
+        List<BorrowRequest> borrowHistory = borrowRequestService.getAllBorrowsByUserId(studentId);
+        model.addAttribute("borrowHistory", borrowHistory);
+
+        List<Book> availableBooks = bookService.getAllBooks();
+        model.addAttribute("availableBooks", availableBooks);
+
+        List<Long> borrowedBookIds = borrowedBooks.stream()
+                .map(br -> br.getBook().getId())
+                .collect(Collectors.toList());
+        model.addAttribute("borrowedBookIds", borrowedBookIds);
+
+        model.addAttribute("welcomeMessage", "Welcome back, " + user.getFullName() + "!");
+        return "student/dashboard";
     }
-    
+
     /**
      * Browse Books Catalog
-     * Displays available books for borrowing with search functionality
-     * 
-     * @param search Optional search parameter
-     * @param model Spring MVC model
-     * @return book catalog template
      */
     @GetMapping("/books")
-    public String browseBooks(
-            @RequestParam(required = false) String search,
-            Model model) {
-        
-        try {
-            model.addAttribute("pageTitle", "Book Catalog");
-            model.addAttribute("currentSection", "books");
-            model.addAttribute("searchQuery", search);
-            
-            // TODO: Implement book search and display
-            // This requires BookService integration
-            model.addAttribute("message", "Book catalog functionality coming soon");
-            
-            return "student/books";
-            
-        } catch (Exception e) {
-            System.err.println("Error loading books: " + e.getMessage());
-            model.addAttribute("errorMessage", "Unable to load book catalog");
-            return "error/student-error";
-        }
+    public String browseBooks(@RequestParam(required = false) String search, Model model) {
+        model.addAttribute("pageTitle", "Book Catalog");
+        model.addAttribute("currentSection", "books");
+        model.addAttribute("searchQuery", search);
+        model.addAttribute("books", bookService.getAllBooks());
+        return "student/books";
     }
-    
+
     /**
-     * My Borrowed Books
-     * Displays current and past borrowing history
-     * 
-     * @param authentication Spring Security authentication
-     * @param model Spring MVC model
-     * @return borrowed books template
+     * My Borrowed Books (current and history)
      */
     @GetMapping("/borrowed")
     public String myBorrowedBooks(Authentication authentication, Model model) {
-        try {
-            CustomUserDetailsService.CustomUserPrincipal userPrincipal = 
+        CustomUserDetailsService.CustomUserPrincipal userPrincipal =
                 (CustomUserDetailsService.CustomUserPrincipal) authentication.getPrincipal();
-            
-            model.addAttribute("currentUser", userPrincipal.getUser());
-            model.addAttribute("pageTitle", "My Borrowed Books");
-            model.addAttribute("currentSection", "borrowed");
-            
-            // TODO: Load user's borrow requests and history
-            // This requires BorrowRequestService integration
-            
-            return "student/borrowed";
-            
-        } catch (Exception e) {
-            System.err.println("Error loading borrowed books: " + e.getMessage());
-            model.addAttribute("errorMessage", "Unable to load borrowing history");
-            return "error/student-error";
-        }
+        User user = userPrincipal.getUser();
+        Long studentId = user.getId();
+
+        model.addAttribute("currentUser", user);
+        model.addAttribute("pageTitle", "My Borrowed Books");
+        model.addAttribute("currentSection", "borrowed");
+
+        model.addAttribute("borrowedBooks", borrowRequestService.getActiveBorrowsByUserId(studentId));
+        model.addAttribute("borrowHistory", borrowRequestService.getAllBorrowsByUserId(studentId));
+
+        return "student/borrowed";
     }
-    
+
     /**
-     * Student Profile Management
-     * View and update personal information
-     * 
-     * @param authentication Spring Security authentication
-     * @param model Spring MVC model
-     * @return student profile template
+     * Student Profile
      */
     @GetMapping("/profile")
     public String studentProfile(Authentication authentication, Model model) {
-        try {
-            CustomUserDetailsService.CustomUserPrincipal userPrincipal = 
+        CustomUserDetailsService.CustomUserPrincipal userPrincipal =
                 (CustomUserDetailsService.CustomUserPrincipal) authentication.getPrincipal();
-            
-            model.addAttribute("currentUser", userPrincipal.getUser());
-            model.addAttribute("pageTitle", "My Profile");
-            model.addAttribute("currentSection", "profile");
-            
-            return "student/profile";
-            
-        } catch (Exception e) {
-            System.err.println("Error loading student profile: " + e.getMessage());
-            model.addAttribute("errorMessage", "Unable to load profile");
-            return "error/student-error";
-        }
+        model.addAttribute("currentUser", userPrincipal.getUser());
+        model.addAttribute("pageTitle", "My Profile");
+        model.addAttribute("currentSection", "profile");
+        return "student/profile";
     }
-    
+
     /**
-     * Request Book Borrow
-     * Submit a request to borrow a specific book
-     * 
-     * @param bookId ID of book to borrow
-     * @param authentication Spring Security authentication
-     * @param model Spring MVC model
-     * @return redirect or error page
+     * Request Borrow (Instant Borrow, no approval)
      */
     @PostMapping("/borrow/{bookId}")
-    public String requestBorrow(
-            @PathVariable Long bookId,
-            Authentication authentication,
-            Model model) {
-        
-        try {
-            CustomUserDetailsService.CustomUserPrincipal userPrincipal = 
+    public String requestBorrow(@PathVariable Long bookId, Authentication authentication, Model model) {
+        CustomUserDetailsService.CustomUserPrincipal userPrincipal =
                 (CustomUserDetailsService.CustomUserPrincipal) authentication.getPrincipal();
-            
-            // TODO: Implement borrow request logic
-            // This requires BorrowRequestService integration
-            
-            model.addAttribute("successMessage", "Borrow request submitted successfully");
-            return "redirect:/student/books";
-            
-        } catch (Exception e) {
-            System.err.println("Error processing borrow request: " + e.getMessage());
-            model.addAttribute("errorMessage", "Unable to process borrow request");
-            return "student/books";
+        User user = userPrincipal.getUser();
+
+        Book book = bookService.getBookById(bookId);
+
+        boolean alreadyBorrowed = borrowRequestService.getActiveBorrowsByUserId(user.getId())
+                .stream()
+                .anyMatch(br -> br.getBook().getId().equals(bookId));
+
+        int remainingCopies = bookService.getRemainingCopies(book);
+
+        if (alreadyBorrowed || remainingCopies <= 0) {
+            model.addAttribute("errorMessage", "Cannot borrow this book (already borrowed or none available)");
+            return "redirect:/student/dashboard";
         }
+
+        borrowRequestService.createBorrowRequest(user.getId(), bookId);
+        return "redirect:/student/dashboard";
     }
-    
+
     /**
-     * Error Handler for Student Section
-     * Centralized error handling for student operations
-     * 
-     * @param e Exception that occurred
-     * @param model Spring MVC model
-     * @return error template
+     * Centralized error handler for student operations
      */
     @ExceptionHandler(Exception.class)
     public String handleStudentError(Exception e, Model model) {
-        System.err.println("Student controller error: " + e.getMessage());
-        e.printStackTrace();
-        
         model.addAttribute("errorMessage", "An unexpected error occurred");
         model.addAttribute("errorDetails", e.getMessage());
         model.addAttribute("pageTitle", "Error");
-        
         return "error/student-error";
     }
 }

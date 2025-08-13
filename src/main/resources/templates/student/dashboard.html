@@ -1,148 +1,117 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${pageTitle} + ' - Libsystems'">Student Dashboard - Libsystems</title>
-
-    <!-- Bootstrap & Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-
+    <title>LibraryHub Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
-        body { background-color: #f9fafb; }
-        .navbar-custom { background: linear-gradient(135deg, #10b981, #059669); }
-        .sidebar { min-height: calc(100vh - 56px); background: #f8fafc; border-right: 1px solid #e2e8f0; }
-        .sidebar .nav-link { color: #64748b; border-radius: 8px; margin: 2px 0; transition: all 0.3s ease; }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active { background: #e2e8f0; color: #1e293b; }
-        .main-content { padding: 2rem; background-color: #fff; min-height: calc(100vh - 56px); }
-        .welcome-card { background: linear-gradient(135deg, #10b981, #059669); color: white; border-radius: 12px; margin-bottom: 2rem; }
-        .stats-card { border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); transition: transform 0.2s ease; }
-        .stats-card:hover { transform: translateY(-2px); }
-        .action-btn { border-radius: 8px; font-weight: 500; transition: all 0.3s ease; }
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding:1rem 2rem; background: rgba(255,255,255,0.95); box-shadow:0 2px 20px rgba(0,0,0,0.05); position:sticky; top:0; z-index:1000;}
+        .navbar-brand { font-size:1.5rem; font-weight:bold; }
+        .navbar-right { display:flex; align-items:center; gap:1rem; }
+        .btn-logout { padding:0.5rem 1rem; background-color:#ef4444; color:white; border:none; cursor:pointer; border-radius:0.25rem;}
+        .btn-logout:hover { background-color:#dc2626; }
+        .dashboard-content { padding:2rem; max-width:1200px; margin:auto; }
+        .alert { background-color:#fef3c7; color:#92400e; padding:1rem; border-radius:0.25rem; margin-bottom:2rem; }
+        .section { margin-bottom:2rem; }
+        .section h2 { margin-bottom:1rem; font-size:1.25rem; border-bottom:2px solid #e5e7eb; padding-bottom:0.5rem; }
+        table { width:100%; border-collapse:collapse; margin-top:0.5rem; }
+        table th, table td { border:1px solid #e5e7eb; padding:0.5rem 1rem; text-align:left; }
+        table th { background-color:#f3f4f6; }
+        .btn-request { padding:0.3rem 0.7rem; background-color:#3b82f6; color:white; border:none; border-radius:0.25rem; cursor:pointer; }
+        .btn-request:hover { background-color:#2563eb; }
+        .scrollable { max-height:400px; overflow-y:auto; }
     </style>
 </head>
 <body>
-    <!-- Top Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="#"><i class="fas fa-book-open me-2"></i>Libsystems</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item dropdown" sec:authorize="isAuthenticated()">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user me-1"></i> <span sec:authentication="principal.user.fullName">Student</span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" th:href="@{/student/profile}"><i class="fas fa-user me-2"></i>Profile</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <form th:action="@{/logout}" method="post" class="d-inline">
-                                    <button type="submit" class="dropdown-item"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
-                                </form>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
 
-    <!-- Layout -->
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
-                <div class="pt-3">
-                    <ul class="nav flex-column">
-                        <li class="nav-item"><a class="nav-link" th:classappend="${currentSection == 'dashboard'} ? 'active'" th:href="@{/student/dashboard}"><i class="fas fa-tachometer-alt me-2"></i> Dashboard</a></li>
-                        <li class="nav-item"><a class="nav-link" th:classappend="${currentSection == 'books'} ? 'active'" th:href="@{/student/books}"><i class="fas fa-book me-2"></i> Browse Books</a></li>
-                        <li class="nav-item"><a class="nav-link" th:classappend="${currentSection == 'borrowed'} ? 'active'" th:href="@{/student/borrowed}"><i class="fas fa-bookmark me-2"></i> My Books</a></li>
-                        <li class="nav-item"><a class="nav-link" th:classappend="${currentSection == 'history'} ? 'active'" th:href="@{/student/history}"><i class="fas fa-history me-2"></i> History</a></li>
-                        <li class="nav-item"><a class="nav-link" th:classappend="${currentSection == 'profile'} ? 'active'" th:href="@{/student/profile}"><i class="fas fa-user me-2"></i> Profile</a></li>
-                    </ul>
-                </div>
-            </nav>
+<nav class="navbar">
+    <div class="navbar-brand">LibraryHub</div>
+    <div class="navbar-right">
+        <span th:text="${currentUser.fullName}">Student Name</span>
+        <form th:action="@{/logout}" method="post"><button type="submit" class="btn-logout">Logout</button></form>
+    </div>
+</nav>
 
-            <!-- Main Content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 main-content">
-                <!-- Welcome -->
-                <div class="welcome-card p-4 mb-4">
-                    <h2 th:text="${welcomeMessage}">Welcome back, Student!</h2>
-                    <p class="mb-0">Your library account is ready. Borrow, return, and explore books.</p>
-                </div>
+<div class="dashboard-content">
 
-                <!-- Messages -->
-                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show">
-                    <i class="fas fa-check-circle me-2"></i><span th:text="${successMessage}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show">
-                    <i class="fas fa-exclamation-circle me-2"></i><span th:text="${errorMessage}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
+    <div class="alert">
+        All borrowed books must be returned within 14 days from the borrow date.
+    </div>
 
-                <!-- Stats -->
-                <div class="row mb-4">
-                    <div class="col-xl-3 col-md-6 mb-4">
-                        <div class="card stats-card text-center p-3">
-                            <div class="text-primary"><i class="fas fa-book fa-2x"></i></div>
-                            <h5>Books Borrowed</h5><h3 class="text-primary">0</h3>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-md-6 mb-4">
-                        <div class="card stats-card text-center p-3">
-                            <div class="text-success"><i class="fas fa-check-circle fa-2x"></i></div>
-                            <h5>Books Returned</h5><h3 class="text-success">0</h3>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-md-6 mb-4">
-                        <div class="card stats-card text-center p-3">
-                            <div class="text-warning"><i class="fas fa-clock fa-2x"></i></div>
-                            <h5>Pending Requests</h5><h3 class="text-warning">0</h3>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-md-6 mb-4">
-                        <div class="card stats-card text-center p-3">
-                            <div class="text-info"><i class="fas fa-calendar-alt fa-2x"></i></div>
-                            <h5>Due Soon</h5><h3 class="text-info">0</h3>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quick Actions -->
-                <div class="card mb-4">
-                    <div class="card-header"><h5 class="mb-0">Quick Actions</h5></div>
-                    <div class="card-body row g-2">
-                        <div class="col-md-3"><a th:href="@{/student/books}" class="btn btn-primary w-100 action-btn"><i class="fas fa-search me-2"></i>Browse Books</a></div>
-                        <div class="col-md-3"><a th:href="@{/student/borrowed}" class="btn btn-success w-100 action-btn"><i class="fas fa-bookmark me-2"></i>My Books</a></div>
-                        <div class="col-md-3"><a th:href="@{/student/history}" class="btn btn-info w-100 action-btn"><i class="fas fa-history me-2"></i>History</a></div>
-                        <div class="col-md-3"><a th:href="@{/student/profile}" class="btn btn-secondary w-100 action-btn"><i class="fas fa-user-edit me-2"></i>Edit Profile</a></div>
-                    </div>
-                </div>
-
-                <!-- Borrowed Books -->
-                <div class="card mb-4">
-                    <div class="card-header d-flex justify-content-between">
-                        <h5 class="mb-0">Currently Borrowed</h5>
-                        <a th:href="@{/student/borrowed}" class="btn btn-sm btn-outline-primary">View All</a>
-                    </div>
-                    <div class="card-body text-center text-muted">
-                        <i class="fas fa-book fa-3x mb-3"></i>
-                        <p>No books borrowed yet.</p>
-                    </div>
-                </div>
-            </main>
+    <!-- Borrowed Books -->
+    <div class="section">
+        <h2>Borrowed Books</h2>
+        <div class="scrollable">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th><th>Author</th><th>Borrow Date</th><th>Return Date</th><th>Status</th><th>Remaining Copies</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="borrow : ${borrowedBooks}" th:with="remainingCopies=${@bookService.getRemainingCopies(borrow.book)}">
+                        <td th:text="${borrow.book.title}"></td>
+                        <td th:text="${borrow.book.author}"></td>
+                        <td th:text="${borrow.borrowDate}"></td>
+                        <td th:text="${borrow.borrowDate != null ? borrow.borrowDate.plusDays(14) : '-'}"></td>
+                        <td th:text="${borrow.status}"></td>
+                        <td th:text="${remainingCopies}"></td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        setTimeout(() => document.querySelectorAll('.alert-dismissible').forEach(a => new bootstrap.Alert(a).close()), 5000);
-    </script>
+    <!-- Borrow History -->
+    <div class="section">
+        <h2>Borrow History</h2>
+        <div class="scrollable">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th><th>Author</th><th>Borrow Date</th><th>Return Date</th><th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="borrow : ${borrowHistory}">
+                        <td th:text="${borrow.book.title}"></td>
+                        <td th:text="${borrow.book.author}"></td>
+                        <td th:text="${borrow.borrowDate}"></td>
+                        <td th:text="${borrow.returnDate != null ? borrow.returnDate : borrow.borrowDate.plusDays(14)}"></td>
+                        <td th:text="${borrow.status}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Request New Book -->
+    <div class="section">
+        <h2>Request New Book</h2>
+        <div class="scrollable">
+            <table>
+                <thead>
+                    <tr><th>Title</th><th>Author</th><th>Available Copies</th><th>Action</th></tr>
+                </thead>
+                <tbody>
+                    <tr th:each="book : ${availableBooks}" th:with="remainingCopies=${@bookService.getRemainingCopies(book)}">
+                        <td th:text="${book.title}"></td>
+                        <td th:text="${book.author}"></td>
+                        <td th:text="${remainingCopies}"></td>
+                        <td>
+                            <form th:action="@{/student/borrow/{bookId}(bookId=${book.id})}" method="post">
+                                <button type="submit" class="btn-request"
+                                        th:disabled="${remainingCopies == 0 or borrowedBookIds.contains(book.id)}">
+                                    Request
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
 </body>
 </html>
