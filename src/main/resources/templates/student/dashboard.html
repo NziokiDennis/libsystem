@@ -2,116 +2,1030 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LibraryHub Dashboard</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        .navbar { display: flex; justify-content: space-between; align-items: center; padding:1rem 2rem; background: rgba(255,255,255,0.95); box-shadow:0 2px 20px rgba(0,0,0,0.05); position:sticky; top:0; z-index:1000;}
-        .navbar-brand { font-size:1.5rem; font-weight:bold; }
-        .navbar-right { display:flex; align-items:center; gap:1rem; }
-        .btn-logout { padding:0.5rem 1rem; background-color:#ef4444; color:white; border:none; cursor:pointer; border-radius:0.25rem;}
-        .btn-logout:hover { background-color:#dc2626; }
-        .dashboard-content { padding:2rem; max-width:1200px; margin:auto; }
-        .alert { background-color:#fef3c7; color:#92400e; padding:1rem; border-radius:0.25rem; margin-bottom:2rem; }
-        .section { margin-bottom:2rem; }
-        .section h2 { margin-bottom:1rem; font-size:1.25rem; border-bottom:2px solid #e5e7eb; padding-bottom:0.5rem; }
-        table { width:100%; border-collapse:collapse; margin-top:0.5rem; }
-        table th, table td { border:1px solid #e5e7eb; padding:0.5rem 1rem; text-align:left; }
-        table th { background-color:#f3f4f6; }
-        .btn-request { padding:0.3rem 0.7rem; background-color:#3b82f6; color:white; border:none; border-radius:0.25rem; cursor:pointer; }
-        .btn-request:hover { background-color:#2563eb; }
-        .scrollable { max-height:400px; overflow-y:auto; }
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #1e293b;
+            background: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            position: sticky;
+            top: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+        }
+
+        .navbar-brand i {
+            margin-right: 0.5rem;
+            font-size: 2rem;
+            color: #ffd700;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .user-welcome {
+            color: white;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-welcome i {
+            color: #ffd700;
+        }
+
+        .btn-logout {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-logout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        /* Dashboard Content */
+        .dashboard-content {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            min-height: calc(100vh - 80px);
+        }
+
+        /* Welcome Section */
+        .welcome-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(50%, -50%);
+        }
+
+        .welcome-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .welcome-content h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Alert/Notice */
+        .alert {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #92400e;
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            border-left: 4px solid #f59e0b;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .alert i {
+            font-size: 1.5rem;
+            color: #d97706;
+        }
+
+        /* Section Styling */
+        .section {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            padding: 1.5rem 2rem;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .section-header i {
+            font-size: 1.5rem;
+            color: #3b82f6;
+        }
+
+        .section-content {
+            padding: 0;
+        }
+
+        /* Table Styling */
+        .scrollable {
+            max-height: 400px;
+            overflow-y: auto;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .scrollable::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .scrollable::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        .scrollable::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .scrollable::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        table th {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
+            transition: background-color 0.2s ease;
+        }
+
+        table tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-borrowed {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-returned {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-overdue {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* Button Styling */
+        .btn-request {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-request:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-request:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .btn-return {
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+
+        .btn-return:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+
+        /* Availability Indicator */
+        .availability {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .availability-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .available {
+            background: #10b981;
+        }
+
+        .limited {
+            background: #f59e0b;
+        }
+
+        .unavailable {
+            background: #ef4444;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #64748b;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #cbd5e1;
+        }
+
+        .empty-state h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: #475569;
+        }
+
+        /* Grid Layout for Cards */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .stat-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 1rem;
+            }
+
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+
+            .dashboard-content {
+                padding: 1rem;
+            }
+
+            .welcome-content h1 {
+                font-size: 2rem;
+            }
+
+            .section-header {
+                padding: 1rem;
+            }
+
+            table th,
+            table td {
+                padding: 0.75rem 0.5rem;
+                font-size: 0.9rem;
+            }
+
+            .user-welcome {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .welcome-content h1 {
+                font-size: 1.5rem;
+            }
+
+            .navbar-right {
+                gap: 0.5rem;
+            }
+
+            .btn-logout {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            table {
+                font-size: 0.8rem;
+            }
+
+            .scrollable {
+                max-height: 300px;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Fade-in animation */
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
 
+<!-- Navigation Bar -->
 <nav class="navbar">
-    <div class="navbar-brand">LibraryHub</div>
-    <div class="navbar-right">
-        <span th:text="${currentUser.fullName}">Student Name</span>
-        <form th:action="@{/logout}" method="post"><button type="submit" class="btn-logout">Logout</button></form>
+    <div class="nav-container">
+        <a href="#" class="navbar-brand">
+            <i class="fas fa-book-open"></i>
+            LibraryHub
+        </a>
+        <div class="navbar-right">
+            <div class="user-welcome">
+                <i class="fas fa-user-circle"></i>
+                <span th:text="${currentUser.fullName}">Student Name</span>
+            </div>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </form>
+        </div>
     </div>
 </nav>
 
 <div class="dashboard-content">
-
-    <div class="alert">
-        All borrowed books must be returned within 14 days from the borrow date.
+    <!-- Welcome Section -->
+    <div class="welcome-section fade-in">
+        <div class="welcome-content">
+            <h1 th:text="${welcomeMessage ?: 'Welcome to LibraryHub'}">Welcome to LibraryHub</h1>
+            <p class="welcome-subtitle">Discover, borrow, and manage your reading journey</p>
+        </div>
     </div>
 
-    <!-- Borrowed Books -->
-    <div class="section">
-        <h2>Borrowed Books</h2>
-        <div class="scrollable">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Title</th><th>Author</th><th>Borrow Date</th><th>Return Date</th><th>Status</th><th>Remaining Copies</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="borrow : ${borrowedBooks}" th:with="remainingCopies=${@bookService.getRemainingCopies(borrow.book)}">
-                        <td th:text="${borrow.book.title}"></td>
-                        <td th:text="${borrow.book.author}"></td>
-                        <td th:text="${borrow.borrowDate}"></td>
-                        <td th:text="${borrow.borrowDate != null ? borrow.borrowDate.plusDays(14) : '-'}"></td>
-                        <td th:text="${borrow.status}"></td>
-                        <td th:text="${remainingCopies}"></td>
-                    </tr>
-                </tbody>
-            </table>
+    <!-- Important Notice -->
+    <div class="alert fade-in">
+        <i class="fas fa-info-circle"></i>
+        <div>
+            <strong>Important:</strong> All borrowed books must be returned within 14 days from the borrow date.
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="cards-grid fade-in">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="stat-number" th:text="${borrowedBooks.size()}">0</div>
+            <div class="stat-label">Currently Borrowed</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-history"></i>
+            </div>
+            <div class="stat-number" th:text="${borrowHistory.size()}">0</div>
+            <div class="stat-label">Total Borrowed</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-book-open"></i>
+            </div>
+            <div class="stat-number" th:text="${availableBooks.size()}">0</div>
+            <div class="stat-label">Books Available</div>
+        </div>
+    </div>
+
+    <!-- Currently Borrowed Books -->
+    <div class="section fade-in">
+        <div class="section-header">
+            <i class="fas fa-bookmark"></i>
+            <h2>Currently Borrowed Books</h2>
+        </div>
+        <div class="section-content">
+            <div class="scrollable" th:if="${borrowedBooks.size() > 0}">
+                <table>
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-book"></i> Title</th>
+                            <th><i class="fas fa-user"></i> Author</th>
+                            <th><i class="fas fa-calendar-alt"></i> Borrow Date</th>
+                            <th><i class="fas fa-calendar-check"></i> Due Date</th>
+                            <th><i class="fas fa-info-circle"></i> Status</th>
+                            <th><i class="fas fa-layer-group"></i> Available Copies</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="borrow : ${borrowedBooks}" th:with="remainingCopies=${@bookService.getRemainingCopies(borrow.book)}">
+                            <td th:text="${borrow.book.title}">Book Title</td>
+                            <td th:text="${borrow.book.author}">Author Name</td>
+                            <td th:text="${borrow.borrowDate}">2024-01-01</td>
+                            <td th:text="${borrow.borrowDate != null ? borrow.borrowDate.plusDays(14) : '-'}">2024-01-15</td>
+                            <td>
+                                <span class="status-badge status-borrowed" th:text="${borrow.status}">BORROWED</span>
+                            </td>
+                            <td>
+                                <div class="availability">
+                                    <span class="availability-dot" 
+                                          th:class="${remainingCopies > 5 ? 'availability-dot available' : remainingCopies > 0 ? 'availability-dot limited' : 'availability-dot unavailable'}"></span>
+                                    <span th:text="${remainingCopies}">5</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="empty-state" th:if="${borrowedBooks.size() == 0}">
+                <i class="fas fa-book-open"></i>
+                <h3>No books currently borrowed</h3>
+                <p>Browse our collection and request a book to get started!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Request New Books -->
+    <div class="section fade-in">
+        <div class="section-header">
+            <i class="fas fa-plus-circle"></i>
+            <h2>Request New Books</h2>
+        </div>
+        <div class="section-content">
+            <div class="scrollable" th:if="${availableBooks.size() > 0}">
+                <table>
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-book"></i> Title</th>
+                            <th><i class="fas fa-user"></i> Author</th>
+                            <th><i class="fas fa-layer-group"></i> Available Copies</th>
+                            <th><i class="fas fa-cog"></i> Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="book : ${availableBooks}" th:with="remainingCopies=${@bookService.getRemainingCopies(book)}">
+                            <td th:text="${book.title}">Book Title</td>
+                            <td th:text="${book.author}">Author Name</td>
+                            <td>
+                                <div class="availability">
+                                    <span class="availability-dot" 
+                                          th:class="${remainingCopies > 5 ? 'availability-dot available' : remainingCopies > 0 ? 'availability-dot limited' : 'availability-dot unavailable'}"></span>
+                                    <span th:text="${remainingCopies}">5</span>
+                                </div>
+                            </td>
+                            <td>
+                                <form th:action="@{/student/borrow/{bookId}(bookId=${book.id})}" method="post" class="borrow-form">
+                                    <button type="submit" class="btn-request"
+                                            th:disabled="${remainingCopies == 0 or borrowedBookIds.contains(book.id)}">
+                                        <i class="fas fa-download"></i>
+                                        <span th:text="${borrowedBookIds.contains(book.id) ? 'Already Borrowed' : remainingCopies == 0 ? 'Unavailable' : 'Request'}">Request</span>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="empty-state" th:if="${availableBooks.size() == 0}">
+                <i class="fas fa-books"></i>
+                <h3>No books available</h3>
+                <p>Check back later for new additions to our collection!</p>
+            </div>
         </div>
     </div>
 
     <!-- Borrow History -->
-    <div class="section">
-        <h2>Borrow History</h2>
-        <div class="scrollable">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Title</th><th>Author</th><th>Borrow Date</th><th>Return Date</th><th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="borrow : ${borrowHistory}">
-                        <td th:text="${borrow.book.title}"></td>
-                        <td th:text="${borrow.book.author}"></td>
-                        <td th:text="${borrow.borrowDate}"></td>
-                        <td th:text="${borrow.returnDate != null ? borrow.returnDate : borrow.borrowDate.plusDays(14)}"></td>
-                        <td th:text="${borrow.status}"></td>
-                    </tr>
-                </tbody>
-            </table>
+    <div class="section fade-in">
+        <div class="section-header">
+            <i class="fas fa-history"></i>
+            <h2>Borrow History</h2>
         </div>
-    </div>
-
-    <!-- Request New Book -->
-    <div class="section">
-        <h2>Request New Book</h2>
-        <div class="scrollable">
-            <table>
-                <thead>
-                    <tr><th>Title</th><th>Author</th><th>Available Copies</th><th>Action</th></tr>
-                </thead>
-                <tbody>
-                    <tr th:each="book : ${availableBooks}" th:with="remainingCopies=${@bookService.getRemainingCopies(book)}">
-                        <td th:text="${book.title}"></td>
-                        <td th:text="${book.author}"></td>
-                        <td th:text="${remainingCopies}"></td>
-                        <td>
-                            <form th:action="@{/student/borrow/{bookId}(bookId=${book.id})}" method="post">
-                                <button type="submit" class="btn-request"
-                                        th:disabled="${remainingCopies == 0 or borrowedBookIds.contains(book.id)}">
-                                    Request
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="section-content">
+            <div class="scrollable" th:if="${borrowHistory.size() > 0}">
+                <table>
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-book"></i> Title</th>
+                            <th><i class="fas fa-user"></i> Author</th>
+                            <th><i class="fas fa-calendar-alt"></i> Borrow Date</th>
+                            <th><i class="fas fa-calendar-check"></i> Return Date</th>
+                            <th><i class="fas fa-info-circle"></i> Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="borrow : ${borrowHistory}">
+                            <td th:text="${borrow.book.title}">Book Title</td>
+                            <td th:text="${borrow.book.author}">Author Name</td>
+                            <td th:text="${borrow.borrowDate}">2024-01-01</td>
+                            <td th:text="${borrow.returnDate != null ? borrow.returnDate : borrow.borrowDate.plusDays(14)}">2024-01-15</td>
+                            <td>
+                                <span class="status-badge" 
+                                      th:class="${borrow.status == 'BORROWED' ? 'status-badge status-borrowed' : 'status-badge status-returned'}"
+                                      th:text="${borrow.status}">RETURNED</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="empty-state" th:if="${borrowHistory.size() == 0}">
+                <i class="fas fa-history"></i>
+                <h3>No borrow history</h3>
+                <p>Your reading history will appear here once you start borrowing books.</p>
+            </div>
         </div>
     </div>
 
 </div>
+
+<script>
+    // DOM Content Loaded Event
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeDashboard();
+        setupFormHandlers();
+        initializeAnimations();
+    });
+
+    // Initialize dashboard functionality
+    function initializeDashboard() {
+        // Add smooth scrolling for better UX
+        document.documentElement.style.scrollBehavior = 'smooth';
+        
+        // Update navbar on scroll
+        window.addEventListener('scroll', updateNavbarOnScroll);
+        
+        // Initialize tooltips (if needed)
+        initializeTooltips();
+    }
+
+    // Setup form submission handlers
+    function setupFormHandlers() {
+        const borrowForms = document.querySelectorAll('.borrow-form');
+        
+        borrowForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const button = this.querySelector('.btn-request');
+                
+                if (!button.disabled) {
+                    // Add loading state
+                    button.innerHTML = '<div class="loading"></div> Processing...';
+                    button.disabled = true;
+                    
+                    // Optional: Add timeout to re-enable button if request fails
+                    setTimeout(() => {
+                        if (button.disabled) {
+                            button.innerHTML = '<i class="fas fa-download"></i> Request';
+                            button.disabled = false;
+                        }
+                    }, 10000);
+                }
+            });
+        });
+    }
+
+    // Initialize animations
+    function initializeAnimations() {
+        // Animate stats on load
+        animateStats();
+        
+        // Setup intersection observer for sections
+        observeSections();
+    }
+
+    // Animate statistics numbers
+    function animateStats() {
+        const statNumbers = document.querySelectorAll('.stat-number');
+        
+        statNumbers.forEach(stat => {
+            const target = parseInt(stat.textContent);
+            const duration = 1500;
+            const startTime = performance.now();
+            
+            function updateNumber(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const current = Math.floor(target * progress);
+                
+                stat.textContent = current;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateNumber);
+                }
+            }
+            
+            requestAnimationFrame(updateNumber);
+        });
+    }
+
+    // Observe sections for animations
+    function observeSections() {
+        const sections = document.querySelectorAll('.section');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        sections.forEach((section, index) => {
+            section.style.opacity = '0';
+            section.style.transform = 'translateY(30px)';
+            section.style.transition = `all 0.6s ease ${index * 0.1}s`;
+            observer.observe(section);
+        });
+    }
+
+    // Update navbar on scroll
+    function updateNavbarOnScroll() {
+        const navbar = document.querySelector('.navbar');
+        
+        if (window.scrollY > 50) {
+            navbar.style.background = 'linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%)';
+            navbar.style.backdropFilter = 'blur(20px)';
+        } else {
+            navbar.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            navbar.style.backdropFilter = 'blur(10px)';
+        }
+    }
+
+    // Initialize tooltips (basic implementation)
+    function initializeTooltips() {
+        const elementsWithTooltips = document.querySelectorAll('[title]');
+        
+        elementsWithTooltips.forEach(element => {
+            element.addEventListener('mouseenter', function() {
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tooltip';
+                tooltip.textContent = this.title;
+                tooltip.style.cssText = `
+                    position: absolute;
+                    background: #1e293b;
+                    color: white;
+                    padding: 0.5rem 1rem;
+                    border-radius: 8px;
+                    font-size: 0.875rem;
+                    z-index: 1000;
+                    pointer-events: none;
+                    white-space: nowrap;
+                `;
+                
+                document.body.appendChild(tooltip);
+                
+                // Remove title to prevent default tooltip
+                this.setAttribute('data-title', this.title);
+                this.removeAttribute('title');
+                
+                // Position tooltip
+                const rect = this.getBoundingClientRect();
+                tooltip.style.left = rect.left + 'px';
+                tooltip.style.top = (rect.top - tooltip.offsetHeight - 5) + 'px';
+            });
+            
+            element.addEventListener('mouseleave', function() {
+                const tooltip = document.querySelector('.tooltip');
+                if (tooltip) {
+                    tooltip.remove();
+                }
+                
+                // Restore title
+                if (this.getAttribute('data-title')) {
+                    this.title = this.getAttribute('data-title');
+                    this.removeAttribute('data-title');
+                }
+            });
+        });
+    }
+
+    // Utility function to show notifications
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            animation: slideInNotification 0.3s ease;
+        `;
+        
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            notification.style.animation = 'slideOutNotification 0.3s ease';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    // Add notification animations to CSS
+    const notificationStyles = document.createElement('style');
+    notificationStyles.textContent = `
+        @keyframes slideInNotification {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes slideOutNotification {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(notificationStyles);
+
+    // Check for URL parameters to show messages
+    function checkForMessages() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const success = urlParams.get('success');
+        const error = urlParams.get('error');
+        
+        if (success) {
+            showNotification(decodeURIComponent(success), 'success');
+        }
+        
+        if (error) {
+            showNotification(decodeURIComponent(error), 'error');
+        }
+    }
+
+    // Initialize message checking
+    checkForMessages();
+
+    // Enhanced table row interactions
+    function enhanceTableInteractions() {
+        const tableRows = document.querySelectorAll('tbody tr');
+        
+        tableRows.forEach(row => {
+            row.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.02)';
+                this.style.zIndex = '10';
+                this.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.1)';
+            });
+            
+            row.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+                this.style.zIndex = '1';
+                this.style.boxShadow = 'none';
+            });
+        });
+    }
+
+    // Call enhanced interactions
+    enhanceTableInteractions();
+
+    // Smooth section transitions
+    function initializeSectionTransitions() {
+        const sections = document.querySelectorAll('.section');
+        
+        sections.forEach(section => {
+            section.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px) scale(1.02)';
+            });
+            
+            section.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+    }
+
+    initializeSectionTransitions();
+
+    // Keyboard navigation support
+    document.addEventListener('keydown', function(e) {
+        // Alt + H for home/dashboard
+        if (e.altKey && e.key === 'h') {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Alt + B for borrowed books section
+        if (e.altKey && e.key === 'b') {
+            e.preventDefault();
+            const borrowedSection = document.querySelector('.section:nth-of-type(2)');
+            if (borrowedSection) {
+                borrowedSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        
+        // Alt + R for request books section
+        if (e.altKey && e.key === 'r') {
+            e.preventDefault();
+            const requestSection = document.querySelector('.section:nth-of-type(3)');
+            if (requestSection) {
+                requestSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    });
+
+    // Performance optimization: Lazy load images if any
+    function initializeLazyLoading() {
+        const images = document.querySelectorAll('img[data-src]');
+        
+        if ('IntersectionObserver' in window) {
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        img.src = img.dataset.src;
+                        img.classList.remove('lazy');
+                        imageObserver.unobserve(img);
+                    }
+                });
+            });
+            
+            images.forEach(img => imageObserver.observe(img));
+        }
+    }
+
+    initializeLazyLoading();
+
+    console.log('LibraryHub Student Dashboard loaded successfully!');
+</script>
+
 </body>
 </html>
