@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  *
  * Handles all student-specific operations including dashboard access,
  * book browsing, borrow requests, and profile management.
- *
+ *we have separated student and admin logic to ensure that we dont mix them, ensuring clean architecture.
  * Security: All methods require STUDENT role authentication
  *
  * Key Features:

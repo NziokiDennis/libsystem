@@ -91,6 +91,13 @@ public class BorrowRequestService {
     }
 
     /**
+     * Get all currently borrowed books (status BORROWED).
+     */
+    public List<BorrowRequest> getAllBorrowedBooks() {
+        return borrowRequestRepository.findByStatus(BorrowRequest.Status.BORROWED);
+    }
+
+    /**
      * Mark a borrow as returned. Sets returnDate to today.
      */
     @Transactional

@@ -904,3 +904,5 @@ html {
 ::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
 }
+
+/* we store our css here if we didnt write it internally, take note of this admin.css we will call it in admin dashboard */

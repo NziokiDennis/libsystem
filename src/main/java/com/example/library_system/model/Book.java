@@ -1,4 +1,5 @@
-// Book.java
+// Book.java, what we did here is to define the entity for the database setup, 
+//as you saw we have three table - book, borrowrequest and user (we define them in models)
 package com.example.library_system.model;
 
 import jakarta.persistence.*;

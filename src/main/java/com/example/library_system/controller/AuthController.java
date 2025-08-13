@@ -15,7 +15,7 @@ public class AuthController {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
             return "redirect:/admin/dashboard";
         } else {
-            return "redirect:/student/dashboard";
+            return "redirect:/student/dashboard";  //controller for redirections
         }
     }
 }

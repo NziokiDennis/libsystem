@@ -121,3 +121,6 @@ public class User {
         this.active = active;
     }
 }
+
+//everytime we run spingboot mvn command this data is mapped into our db, 
+//we set the hibernate command to update so the sql wont be mapped a new to save existing data
