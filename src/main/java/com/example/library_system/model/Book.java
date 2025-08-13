@@ -1,33 +1,32 @@
+// Book.java
 package com.example.library_system.model;
 
 import jakarta.persistence.*;
 
-// Entity mapping to books table
 @Entity
 @Table(name = "books")
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long bookId; // Maps to book_id
+    private Long id;
 
     @Column(unique = true)
-    private String isbn; // Unique ISBN, nullable
+    private String isbn;
 
     @Column(nullable = false)
-    private String title; // Book title
+    private String title;
 
     @Column(nullable = false)
-    private String author; // Book author
+    private String author;
 
-    @Column(name = "total_copies", nullable = false)
-    private int totalCopies; // Total stock
+    @Column(nullable = false)
+    private int totalCopies;
 
-    @Column(name = "available_copies", nullable = false)
-    private int availableCopies; // Available for borrowing
+    @Column(nullable = false)
+    private int availableCopies;
 
-    // Getters and Setters
-    public Long getBookId() { return bookId; }
-    public void setBookId(Long bookId) { this.bookId = bookId; }
+    // Getters/Setters
+    public Long getId() { return id; }
     public String getIsbn() { return isbn; }
     public void setIsbn(String isbn) { this.isbn = isbn; }
     public String getTitle() { return title; }
