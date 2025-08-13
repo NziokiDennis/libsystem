@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} + ' - Libsystems'">Admin Dashboard - Libsystems</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom Admin CSS -->
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            color: white;
+        }
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            margin: 2px 0;
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        .main-content {
+            padding: 2rem;
+            background-color: #f8fafc;
+            min-height: 100vh;
+        }
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-2px);
+        }
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+        .bg-gradient-primary { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .bg-gradient-success { background: linear-gradient(135deg, #10b981, #059669); }
+        .bg-gradient-info { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+        .bg-gradient-warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <!-- Logo -->
+                    <div class="text-center mb-4">
+                        <i class="fas fa-book-open fa-2x mb-2"></i>
+                        <h4>Libsystems</h4>
+                        <p class="small mb-0">Admin Panel</p>
+                    </div>
+                    
+                    <!-- User Info -->
+                    <div class="bg-white bg-opacity-10 rounded p-3 mb-4" sec:authorize="isAuthenticated()">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-user-shield fa-lg me-2"></i>
+                            <div>
+                                <div class="fw-bold" sec:authentication="principal.user.fullName">Admin Name</div>
+                                <small class="text-white-50" sec:authentication="principal.user.username">admin</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Navigation Menu -->
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" th:classappend="${currentSection == 'dashboard'} ? 'active' : ''" 
+                               th:href="@{/admin/dashboard}">
+                                <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:classappend="${currentSection == 'students'} ? 'active' : ''" 
+                               th:href="@{/admin/students}">
+                                <i class="fas fa-users me-2"></i> Students
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:classappend="${currentSection == 'books'} ? 'active' : ''" 
+                               th:href="@{/admin/books}">
+                                <i class="fas fa-book me-2"></i> Books
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:classappend="${currentSection == 'reports'} ? 'active' : ''" 
+                               th:href="@{/admin/reports}">
+                                <i class="fas fa-chart-bar me-2"></i> Reports
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:classappend="${currentSection == 'settings'} ? 'active' : ''" 
+                               th:href="@{/admin/settings}">
+                                <i class="fas fa-cog me-2"></i> Settings
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <!-- Logout -->
+                    <div class="mt-auto pt-4">
+                        <form th:action="@{/logout}" method="post">
+                            <button type="submit" class="btn btn-outline-light w-100">
+                                <i class="fas fa-sign-out-alt me-2"></i> Logout
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 main-content">
+                <!-- Header -->
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h2" th:text="${pageTitle}">Dashboard</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-download me-1"></i> Export
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Success/Error Messages -->
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                
+                <!-- Statistics Cards -->
+                <div class="row mb-4" th:if="${userStats}">
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card stats-card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                            Total Users
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${userStats.totalUsers}">0</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="stats-icon bg-gradient-primary">
+                                            <i class="fas fa-users"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card stats-card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                            Students
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${userStats.totalStudents}">0</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="stats-icon bg-gradient-success">
+                                            <i class="fas fa-user-graduate"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card stats-card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                            Admins
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${userStats.totalAdmins}">0</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="stats-icon bg-gradient-info">
+                                            <i class="fas fa-user-shield"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card stats-card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                            Total Books
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">Coming Soon</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="stats-icon bg-gradient-warning">
+                                            <i class="fas fa-book"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Quick Actions</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3 mb-2">
+                                        <a th:href="@{/admin/students/create}" class="btn btn-primary w-100">
+                                            <i class="fas fa-user-plus me-2"></i> Add Student
+                                        </a>
+                                    </div>
+                                    <div class="col-md-3 mb-2">
+                                        <a th:href="@{/admin/books}" class="btn btn-success w-100">
+                                            <i class="fas fa-book-medical me-2"></i> Manage Books
+                                        </a>
+                                    </div>
+                                    <div class="col-md-3 mb-2">
+                                        <a th:href="@{/admin/reports}" class="btn btn-info w-100">
+                                            <i class="fas fa-chart-line me-2"></i> View Reports
+                                        </a>
+                                    </div>
+                                    <div class="col-md-3 mb-2">
+                                        <a th:href="@{/admin/settings}" class="btn btn-secondary w-100">
+                                            <i class="fas fa-cogs me-2"></i> Settings
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activity (Placeholder) -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">System Status</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    Welcome to the Libsystems Admin Dashboard! The system is running smoothly.
+                                </div>
+                                
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <h6>Recent Students</h6>
+                                        <div th:if="${recentStudents and !recentStudents.isEmpty()}">
+                                            <div class="list-group">
+                                                <div class="list-group-item" th:each="student : ${recentStudents}" th:if="${studentStat.index < 5}">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1" th:text="${student.fullName}">Student Name</h6>
+                                                        <small th:text="${student.username}">username</small>
+                                                    </div>
+                                                    <small th:text="${student.email}">email@example.com</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div th:if="${recentStudents == null or recentStudents.isEmpty()}">
+                                            <p class="text-muted">No students registered yet.</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <h6>System Information</h6>
+                                        <ul class="list-unstyled">
+                                            <li><strong>Version:</strong> 1.0.0</li>
+                                            <li><strong>Database:</strong> MySQL Connected</li>
+                                            <li><strong>Server:</strong> Running</li>
+                                            <li><strong>Last Updated:</strong> <span th:text="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd HH:mm')}"></span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
